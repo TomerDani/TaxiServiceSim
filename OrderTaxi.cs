@@ -9,14 +9,14 @@ namespace TaxiServiceSim
     public class OrderTaxi
     {
         public Guid OrderID { get; private set; } = Guid.NewGuid();
-        public string CustomerName { get; private set; } = "";
+        public string CustomerName { get; private set; } = string.Empty;
         public double PickupLocationX { get; private set; }
         public double PickupLocationY { get; private set; }
         public double DestinationX { get; private set; }
         public double DestinationY { get; private set; }
 
-        //Constructors
-        public OrderTaxi() //Creates order with random data
+        //Creates order with random data
+        public OrderTaxi()
         {
             CustomerName = TaxiSimulator.GenerateRandomName();
             PickupLocationX = TaxiSimulator.RandomNumber();
@@ -43,7 +43,7 @@ namespace TaxiServiceSim
             Console.WriteLine($"Pickup Location Y: {PickupLocationY}");
             Console.WriteLine($"Destination X: {DestinationX}");
             Console.WriteLine($"Destination Y: {DestinationY}");
-            Console.WriteLine(); //Empty space line
+            Console.WriteLine("--------------------------------");
         }      
     }
 }

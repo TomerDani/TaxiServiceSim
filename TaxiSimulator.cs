@@ -11,25 +11,33 @@ namespace TaxiServiceSim
     public class TaxiSimulator
     {
         #region singleton
-        //Singleton
-        private static readonly TaxiSimulator _instance = new TaxiSimulator();
+
+        private static TaxiSimulator _instance = new TaxiSimulator();
+        private static object _lock = new object();
 
         private TaxiSimulator()
         {
-
         }
 
         public static TaxiSimulator Instance
         {
             get
             {
-                return _instance;
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new TaxiSimulator();
+                    }
+
+                    return _instance;
+                }
             }
         }
         #endregion
 
-        public const double SimulatorTickTimer = 20; //20 Seconds per tick
-        public const int MaximumBoundryXY = 20000; //City boundires: 20km | 20000m for X and Y
+        public const double SIMULATOR_TICK_SPEED = 20; //20 Seconds per tick
+        public const int MAXIMUM_BOUNDRY_XY = 20000; //City boundires: 20km | 20000m for X and Y
 
         private OrderManager orderManager = OrderManager.Instance;
 
@@ -55,7 +63,7 @@ namespace TaxiServiceSim
             while (isRunning)
             {
                 Console.WriteLine("Press 'Enter' to trigger or 'E' to exit.");
-                ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true); // Read a key without displaying it.
+                ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
 
                 switch (keyInfo.Key)
                 {
@@ -95,7 +103,7 @@ namespace TaxiServiceSim
         public static double RandomNumber()
         {
             Random random = new Random();
-            return Math.Round(new Random().NextDouble() * MaximumBoundryXY, 2);
+            return Math.Round(new Random().NextDouble() * MAXIMUM_BOUNDRY_XY, 2);
         }
 
         

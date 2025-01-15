@@ -13,19 +13,26 @@ namespace TaxiServiceSim
     {
         #region singleton
         //Singleton
-
-        private static readonly OrderManager _instance = new OrderManager();
+        private static OrderManager _instance = null;
+        private static object _lock = new object();
 
         private OrderManager()
         {
-
         }
 
         public static OrderManager Instance
         {
             get
             {
-                return _instance;
+                lock (_lock) 
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new OrderManager();
+                    }
+
+                    return _instance;
+                }
             }
         }
         #endregion
@@ -33,18 +40,18 @@ namespace TaxiServiceSim
         public List<Taxi> TaxiList { get; set; } = new List<Taxi>();
 
         //Queue for all taxi orders
-        private static Queue<OrderTaxi> globalOrderQueue = new Queue<OrderTaxi>();
+        private Queue<OrderTaxi> globalOrderQueue = new Queue<OrderTaxi>();
 
-        // Add an order to the queue
+        //Add an order to the queue
         public void AddOrder(OrderTaxi order)
         {
             globalOrderQueue.Enqueue(order);
             Console.WriteLine($"Order {order.OrderID} added to the global queue.");
-            Console.WriteLine("Order details:");
+            Console.WriteLine("Order details: ");
             order.PrintOrderDetails();
         }
 
-        // Process the next order in the queue
+        //Process the next order in the queue
         public void ActivateNextOrder()
         {
             if (globalOrderQueue.Count > 0)
@@ -58,13 +65,13 @@ namespace TaxiServiceSim
                     Console.WriteLine("No taxies aviable at the moment.");
                 }
             }
-
             else
             {
                 Console.WriteLine("No orders in the global queue.");
             }
         }
 
+        //Process all taxies current orders
         public void ProcessAllOrders() 
         {
             foreach (Taxi taxi in TaxiList)
@@ -85,7 +92,7 @@ namespace TaxiServiceSim
                 if (targetTaxi != null)
                 {
                     targetTaxi.CurrentOrder = currentOrder;
-                    targetTaxi.currentStatus = TaxiStatus.HeadingToCustomer; //Make inverntal to taxi
+                    targetTaxi.currentStatus = TaxiStatus.HeadingToCustomer;
                     Console.WriteLine($"Taxi number {targetTaxi.TaxiID} processing order {currentOrder.OrderID}");
                 }
                 else
@@ -102,12 +109,13 @@ namespace TaxiServiceSim
         //Gets the nearst idle taxi ID
         public string GetClosestFreeTaxiID(double destinationX, double destinationY)
         {
-            string closestTaxiID = "";
-            double closestTaxiDistance = TaxiSimulator.MaximumBoundryXY ^ 2;
+            string closestTaxiID = string.Empty;
+            double closestTaxiDistance = TaxiSimulator.MAXIMUM_BOUNDRY_XY ^ 2;
 
             foreach (Taxi taxi in TaxiList)
             {
                 double currentTaxiDistance = Math.Abs(destinationX - taxi.PositionX) + Math.Abs(destinationY - taxi.PositionY);
+
                 if (taxi.currentStatus == TaxiStatus.Idle && taxi.CurrentOrder == null && currentTaxiDistance < closestTaxiDistance)
                 {
                     closestTaxiID = taxi.TaxiID;
@@ -121,8 +129,8 @@ namespace TaxiServiceSim
         //Print current taxi list state
         public void PrintTaxiListState()
         {
-
             Console.WriteLine("---------------TAXI STATES-------------");
+
             foreach (Taxi taxi in TaxiList)
             {
                 Console.WriteLine();
@@ -131,6 +139,7 @@ namespace TaxiServiceSim
                 Console.WriteLine("taxi Y " + taxi.PositionY);
                 Console.WriteLine();
             }
+
             Console.WriteLine("------------END TAXI STATES------------");
         }
     }

@@ -15,14 +15,14 @@ namespace TaxiServiceSim
             HeadingToDestination // Taxi is on the way to the customer's destination
         }
         public TaxiStatus currentStatus = TaxiStatus.Idle;
-        public string TaxiID { get; private set; } = TaxiSimulator.GenerateCarNumber();
-        public string DriverName { get; private set; } = "";
-        public double PositionX { get;  private set; } = TaxiSimulator.RandomNumber();
-        public double PositionY { get;  private set; } = TaxiSimulator.RandomNumber();
+        public string TaxiID { get; private set; }
+        public string DriverName { get; private set; }
+        public double PositionX { get;  private set; }
+        public double PositionY { get;  private set; }
         public OrderTaxi? _currentOrder = null;
 
-        private int Speed = 20; // 72 KPH | 20M/S
-        private double timeRemaining = TaxiSimulator.SimulatorTickTimer;
+        private int Speed = 20; //Measured in M/S (72KH)
+        private double timeRemaining = TaxiSimulator.SIMULATOR_TICK_SPEED;
 
         public OrderTaxi? CurrentOrder
         {
@@ -33,14 +33,9 @@ namespace TaxiServiceSim
             set
             {
                 _currentOrder = value;
-                if (_currentOrder != null) 
-                {
-                    currentStatus = TaxiStatus.HeadingToCustomer;
-                }
             }
         }
 
-        //Constructors
         public Taxi(string driverName, double positionX, double positionY)
         {
             DriverName = driverName;
@@ -50,13 +45,17 @@ namespace TaxiServiceSim
         public Taxi(string driverName)
         {
             DriverName = driverName;
+            TaxiID = TaxiSimulator.GenerateCarNumber();
+            PositionX = TaxiSimulator.RandomNumber();
+            PositionX = TaxiSimulator.RandomNumber();
         }
 
         public void ProcessTaxiOrder() 
         {
-            timeRemaining = TaxiSimulator.SimulatorTickTimer;
+            timeRemaining = TaxiSimulator.SIMULATOR_TICK_SPEED;
+
             //Check if this taxi got an order
-            if (CurrentOrder != null) //check if idle
+            if (currentStatus != TaxiStatus.Idle)
             {
                 //Start moving towards the customer
                 if(currentStatus == TaxiStatus.HeadingToCustomer) 
@@ -87,7 +86,7 @@ namespace TaxiServiceSim
 
 
         //Move taxi to destination
-        private void MoveTaxi(double destinationX, double destinationY, double timeRemaining = TaxiSimulator.SimulatorTickTimer)//Add comments the units are meters and seconds
+        private void MoveTaxi(double destinationX, double destinationY, double timeRemaining = TaxiSimulator.SIMULATOR_TICK_SPEED)
         {
             double remainingDistanceToTravel = Speed * timeRemaining;
 
