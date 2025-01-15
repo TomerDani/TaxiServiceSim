@@ -1,19 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static TaxiServiceSim.Taxi;
 
 namespace TaxiServiceSim
 {
     //Manager all taxi orders
-    public static class OrderManager
+    public class OrderManager
     {
-        // Global queue for all taxi orders
+        #region singleton
+        //Singleton
+
+        private static readonly OrderManager _instance = new OrderManager();
+
+        private OrderManager()
+        {
+
+        }
+
+        public static OrderManager Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+        #endregion
+
+        public List<Taxi> TaxiList { get; set; } = new List<Taxi>();
+
+        //Queue for all taxi orders
         private static Queue<OrderTaxi> globalOrderQueue = new Queue<OrderTaxi>();
 
-        // Add an order to the global queue
-        public static void AddOrder(OrderTaxi order)
+        // Add an order to the queue
+        public void AddOrder(OrderTaxi order)
         {
             globalOrderQueue.Enqueue(order);
             Console.WriteLine($"Order {order.OrderID} added to the global queue.");
@@ -21,25 +44,94 @@ namespace TaxiServiceSim
             order.PrintOrderDetails();
         }
 
-        // Process the next order in the global queue
-        public static OrderTaxi? GetNextOrder()
+        // Process the next order in the queue
+        public void ActivateNextOrder()
         {
             if (globalOrderQueue.Count > 0)
             {
-                return globalOrderQueue.Dequeue();
+                if (TaxiList.Any(taxi => taxi.currentStatus == TaxiStatus.Idle)) //Run only if there is a free taxi available
+                {
+                    MatchOrderToTaxi(globalOrderQueue.Dequeue());
+                }
+                else
+                {
+                    Console.WriteLine("No taxies aviable at the moment.");
+                }
             }
 
             else
             {
                 Console.WriteLine("No orders in the global queue.");
-                return null;
             }
         }
 
-        // Check if the global queue is empty
-        public static bool IsQueueEmpty()
+        public void ProcessAllOrders() 
         {
-            return globalOrderQueue.Count == 0;
+            foreach (Taxi taxi in TaxiList)
+            {
+                taxi.ProcessTaxiOrder();
+                taxi.PrintDetails();
+            }
+        }
+
+        //Addes the latest orders from the queue to the closest available taxi
+        public void MatchOrderToTaxi(OrderTaxi? currentOrder)
+        {
+            if (currentOrder != null) //Make sure the order isnt empty
+            {
+                string closestTaxiID = GetClosestFreeTaxiID(currentOrder.PickupLocationX, currentOrder.PickupLocationY);
+                Taxi? targetTaxi = TaxiList.FirstOrDefault(t => t.TaxiID == closestTaxiID);
+
+                if (targetTaxi != null)
+                {
+                    targetTaxi.CurrentOrder = currentOrder;
+                    targetTaxi.currentStatus = TaxiStatus.HeadingToCustomer; //Make inverntal to taxi
+                    Console.WriteLine($"Taxi number {targetTaxi.TaxiID} processing order {currentOrder.OrderID}");
+                }
+                else
+                {
+                    Console.WriteLine($"No taxi matches the order.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No orders found.");
+            }
+        }
+
+        //Gets the nearst idle taxi ID
+        public string GetClosestFreeTaxiID(double destinationX, double destinationY)
+        {
+            string closestTaxiID = "";
+            double closestTaxiDistance = TaxiSimulator.MaximumBoundryXY ^ 2;
+
+            foreach (Taxi taxi in TaxiList)
+            {
+                double currentTaxiDistance = Math.Abs(destinationX - taxi.PositionX) + Math.Abs(destinationY - taxi.PositionY);
+                if (taxi.currentStatus == TaxiStatus.Idle && taxi.CurrentOrder == null && currentTaxiDistance < closestTaxiDistance)
+                {
+                    closestTaxiID = taxi.TaxiID;
+                    closestTaxiDistance = currentTaxiDistance;
+                }
+            }
+
+            return closestTaxiID;
+        }
+
+        //Print current taxi list state
+        public void PrintTaxiListState()
+        {
+
+            Console.WriteLine("---------------TAXI STATES-------------");
+            foreach (Taxi taxi in TaxiList)
+            {
+                Console.WriteLine();
+                Console.WriteLine("taxi number " + taxi.TaxiID);
+                Console.WriteLine("taxi X " + taxi.PositionX);
+                Console.WriteLine("taxi Y " + taxi.PositionY);
+                Console.WriteLine();
+            }
+            Console.WriteLine("------------END TAXI STATES------------");
         }
     }
 }

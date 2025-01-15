@@ -4,7 +4,8 @@
     {
         private static void Main(string[] args)
         {
-            TaxiSim sim = TaxiSim.Instance;
+            TaxiSimulator simulator = TaxiSimulator.Instance;
+            OrderManager orderManager = OrderManager.Instance;
 
             List<Taxi> taxiList = new List<Taxi>()
             {
@@ -17,14 +18,14 @@
                 new Taxi("George", 4321.10, 2109.87),
                 new Taxi("Hannah"),
                 new Taxi("Ian", 3456.78, 6543.21),
-                new Taxi("Jane", 1000 , 1000)
+                new Taxi("Jane", 1000 , 1000),
             };
 
-            sim.TaxiList = taxiList;
+            orderManager.TaxiList = taxiList;
 
-            sim.PrintTaxiListState();
+            orderManager.PrintTaxiListState();
 
-            sim.RunSim();
+            simulator.RunSim();
         }
     }
 }

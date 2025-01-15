@@ -15,13 +15,30 @@ namespace TaxiServiceSim
             HeadingToDestination // Taxi is on the way to the customer's destination
         }
         public TaxiStatus currentStatus = TaxiStatus.Idle;
-        public string TaxiID { get; private set; } = GenerateCarNumber();
+        public string TaxiID { get; private set; } = TaxiSimulator.GenerateCarNumber();
         public string DriverName { get; private set; } = "";
-        public double PositionX { get;  set; } = TaxiSim.RandomNumber();
-        public double PositionY { get;  set; } = TaxiSim.RandomNumber();
-        public OrderTaxi? CurrentOrder { get; set; } = null;
+        public double PositionX { get;  private set; } = TaxiSimulator.RandomNumber();
+        public double PositionY { get;  private set; } = TaxiSimulator.RandomNumber();
+        public OrderTaxi? _currentOrder = null;
 
         private int Speed = 20; // 72 KPH | 20M/S
+        private double timeRemaining = TaxiSimulator.SimulatorTickTimer;
+
+        public OrderTaxi? CurrentOrder
+        {
+            get
+            {
+                return _currentOrder;
+            }
+            set
+            {
+                _currentOrder = value;
+                if (_currentOrder != null) 
+                {
+                    currentStatus = TaxiStatus.HeadingToCustomer;
+                }
+            }
+        }
 
         //Constructors
         public Taxi(string driverName, double positionX, double positionY)
@@ -37,15 +54,14 @@ namespace TaxiServiceSim
 
         public void ProcessTaxiOrder() 
         {
-            double timeRemaining = TaxiSim.SimulatorTickTimer;
-
+            timeRemaining = TaxiSimulator.SimulatorTickTimer;
             //Check if this taxi got an order
-            if (CurrentOrder != null)
+            if (CurrentOrder != null) //check if idle
             {
                 //Start moving towards the customer
                 if(currentStatus == TaxiStatus.HeadingToCustomer) 
                 {
-                    timeRemaining = MoveTaxi(CurrentOrder.PickupLocationX, CurrentOrder.PickupLocationY);
+                    MoveTaxi(CurrentOrder.PickupLocationX, CurrentOrder.PickupLocationY);
 
                     //If mannaged to reach the customer before time, prepare to head towards destination
                     if(timeRemaining > 0) 
@@ -59,7 +75,7 @@ namespace TaxiServiceSim
                 {
                     MoveTaxi(CurrentOrder.DestinationX, CurrentOrder.DestinationY, timeRemaining);
 
-                    //If reached the restination, return to idle and discard the completed order.
+                    //If reached the destination, return to idle and discard the completed order.
                     if (CurrentOrder.DestinationX == PositionX && CurrentOrder.DestinationY == PositionY)
                     {
                         currentStatus = TaxiStatus.Idle;
@@ -71,7 +87,7 @@ namespace TaxiServiceSim
 
 
         //Move taxi to destination
-        public double MoveTaxi(double destinationX, double destinationY, double timeRemaining = TaxiSim.SimulatorTickTimer)
+        private void MoveTaxi(double destinationX, double destinationY, double timeRemaining = TaxiSimulator.SimulatorTickTimer)//Add comments the units are meters and seconds
         {
             double remainingDistanceToTravel = Speed * timeRemaining;
 
@@ -102,7 +118,7 @@ namespace TaxiServiceSim
                 remainingDistanceToTravel = remainingDistanceToTravel - Math.Abs(YDistanceToTravel);
             }
 
-            return (remainingDistanceToTravel / Speed); //Time remaining
+            this.timeRemaining = (remainingDistanceToTravel / Speed);
         }
 
 
@@ -114,17 +130,5 @@ namespace TaxiServiceSim
             Console.WriteLine("Status: " + currentStatus);
             Console.WriteLine();
         }
-
-        public static string GenerateCarNumber()
-        {
-            Random random = new Random();
-
-             // 8-digit format: XXX-XX-XXX
-             int part1 = random.Next(100, 1000); // 3 digits
-             int part2 = random.Next(10, 100);   // 2 digits
-             int part3 = random.Next(100, 1000); // 3 digits
-             return $"{part1}-{part2}-{part3}";  
-        }
-
     }
 }
