@@ -142,5 +142,24 @@ namespace TaxiServiceSim
 
             Console.WriteLine("------------END TAXI STATES------------");
         }
+
+        public void PrintAllOrders()
+        {
+            if (globalOrderQueue.Count == 0)
+            {
+                Console.WriteLine("The order queue is empty.");
+                return;
+            }
+
+            Console.WriteLine("Orders in the queue:");
+            foreach (OrderTaxi order in globalOrderQueue)
+            {
+                Console.WriteLine($"Order ID: {order.OrderID}");
+                Console.WriteLine($"Customer Name: {order.CustomerName}");
+                Console.WriteLine($"Pickup Location: ({order.PickupLocationX}, {order.PickupLocationY})");
+                Console.WriteLine($"Destination: ({order.DestinationX}, {order.DestinationY})");
+                Console.WriteLine("------------------------------------------");
+            }
+        }
     }
 }

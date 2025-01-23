@@ -62,7 +62,9 @@ namespace TaxiServiceSim
             bool isRunning = true;
             while (isRunning)
             {
-                Console.WriteLine("Press 'Enter' to trigger or 'E' to exit.");
+                Console.WriteLine("Press 'Enter' to proceed 20 seconds.");
+                Console.WriteLine("Press 'E' to exit.");
+                Console.WriteLine("Units mesured by Meters.");
                 ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
 
                 switch (keyInfo.Key)
@@ -78,7 +80,7 @@ namespace TaxiServiceSim
                         break;
 
                     default:
-                        Console.WriteLine("Unknown command. Type Press 'Enter' to trigger or 'E' to exit.");
+                        Console.WriteLine("Unknown command. Type Press 'Enter' to proceed 20 seconds or 'E' to exit.");
                         break;
                 }
             }
@@ -88,6 +90,7 @@ namespace TaxiServiceSim
         public void AdvanceSimulator()
         {
             orderManager.AddOrder(new OrderTaxi()); //Adds a new order to the queue
+            orderManager.PrintAllOrders();
             orderManager.ActivateNextOrder(); //Process the latest order
             orderManager.ProcessAllOrders();
         }        
@@ -106,7 +109,6 @@ namespace TaxiServiceSim
             return Math.Round(new Random().NextDouble() * MAXIMUM_BOUNDRY_XY, 2);
         }
 
-        
         public static string GenerateCarNumber()
         {
             Random random = new Random();

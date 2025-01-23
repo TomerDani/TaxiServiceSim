@@ -17,8 +17,8 @@ namespace TaxiServiceSim
         public TaxiStatus currentStatus = TaxiStatus.Idle;
         public string TaxiID { get; private set; }
         public string DriverName { get; private set; }
-        public double PositionX { get;  private set; }
-        public double PositionY { get;  private set; }
+        public double PositionX { get;  private set; } //Mesured in meters
+        public double PositionY { get;  private set; } //Mesured in meters
         public OrderTaxi? _currentOrder = null;
 
         private int Speed = 20; //Measured in M/S (72KH)
@@ -38,6 +38,7 @@ namespace TaxiServiceSim
 
         public Taxi(string driverName, double positionX, double positionY)
         {
+            TaxiID = TaxiSimulator.GenerateCarNumber();
             DriverName = driverName;
             PositionX = positionX;
             PositionY = positionY;
@@ -85,7 +86,7 @@ namespace TaxiServiceSim
         }
 
 
-        //Move taxi to destination
+        //Move taxi to destination. Distance mesured in meters
         private void MoveTaxi(double destinationX, double destinationY, double timeRemaining = TaxiSimulator.SIMULATOR_TICK_SPEED)
         {
             double remainingDistanceToTravel = Speed * timeRemaining;
